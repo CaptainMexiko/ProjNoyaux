@@ -1,3 +1,7 @@
+#ifndef Fanny_PRIEUR_Gwendal_DIDOT_TP
+
+
+
 /*! \file synch.cc 
 //  \brief Routines for synchronizing threads.  
 //
@@ -75,7 +79,16 @@ Semaphore::~Semaphore()
 */
 //----------------------------------------------------------------------
 void
-Semaphore::P() {
+Semaphore::P(Semaphore *s) {
+
+  #ifdef Fanny_PRIEUR_Gwendal_DIDOT_TP
+  //on désactive les interruptions (interrupt.cc, interrupt.h
+  SetStatus(INTERRUPTS_OFF);//TODO check si pas besoin de mettre dans un objet
+  if(){
+  
+  }
+  
+  #endif
   printf("**** Warning: method Semaphore::P is not implemented yet\n");
   exit(-1);
 }
@@ -221,3 +234,5 @@ void Condition::Broadcast() {
   printf("**** Warning: method Condition::Broadcast is not implemented yet\n");
   exit(-1);
 }
+
+#endif

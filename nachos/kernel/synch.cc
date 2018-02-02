@@ -79,17 +79,23 @@ Semaphore::~Semaphore()
 */
 //----------------------------------------------------------------------
 void
-Semaphore::P(Semaphore *s) {
+Semaphore::P() {
 
   #ifdef Fanny_PRIEUR_Gwendal_DIDOT_TP
   //on désactive les interruptions (interrupt.cc, interrupt.h
-  SetStatus(INTERRUPTS_OFF);//TODO check si pas besoin de mettre dans un objet
-  if(){
+  g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  if(this.value<0){
+  	//on endort le thread
+  	g_current_thread->Sleep();
+  	//puis on met le thread en queue de file
+  	this.queue->Append(g_current_thread);
+  }
+  else{
   
   }
   
   #endif
-  printf("**** Warning: method Semaphore::P is not implemented yet\n");
+  printf("**** Method Semaphore::P is implemented \n");
   exit(-1);
 }
 

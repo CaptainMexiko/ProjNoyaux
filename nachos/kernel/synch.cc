@@ -1,6 +1,3 @@
-#ifndef Fanny_PRIEUR_Gwendal_DIDOT_TP
-
-
 
 /*! \file synch.cc 
 //  \brief Routines for synchronizing threads.  
@@ -81,7 +78,7 @@ Semaphore::~Semaphore()
 void
 Semaphore::P() {
 
-  #ifdef Fanny_PRIEUR_Gwendal_DIDOT_TP
+  #ifdef ETUDIANT_TP
   //on désactive les interruptions (interrupt.cc, interrupt.h
   g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   if(this.value<0){
@@ -91,10 +88,12 @@ Semaphore::P() {
   	this.queue->Append(g_current_thread);
   }
   else{
-  
+  	//on décremente notre compteur de semaphore
+  	this.value--;
   }
   
   #endif
+  
   printf("**** Method Semaphore::P is implemented \n");
   exit(-1);
 }
@@ -109,6 +108,22 @@ Semaphore::P() {
 //----------------------------------------------------------------------
 void
 Semaphore::V() {
+	#ifdef ETUDIANT_TP
+	if(!this.queue->isEmpty()){
+		//permet de reveiller le premier element de la liste des threads qui sont en attente sur le sema
+		g_scheduler->ReadyToRun(this.queue->Remove());
+		
+	}
+	else{
+		//on incrémente notre compteur de semaphore
+		this.value=this.value+1;
+	}
+	
+	
+	
+	
+	#endif
+	
    printf("**** Warning: method Semaphore::V is not implemented yet\n");
     exit(-1);
 }
@@ -241,4 +256,4 @@ void Condition::Broadcast() {
   exit(-1);
 }
 
-#endif
+

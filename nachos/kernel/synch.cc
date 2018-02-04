@@ -96,7 +96,7 @@ Semaphore::P() {
 
   #endif
 
-  #ifndef Fanny_PRIEUR_Gwendal_DIDOT_TP
+  #ifndef ETUDIANT_TP
   printf("**** Warning: method Semaphore::P is not implemented yet\n");
 
   exit(-1);
@@ -113,24 +113,25 @@ Semaphore::P() {
 //----------------------------------------------------------------------
 void
 Semaphore::V() {
+
 	#ifdef ETUDIANT_TP
+  //on désactive les interruptions (interrupt.cc, interrupt.h
+  g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  //On vérifie qu'il y ait des threads en attentes sur le sémaphore
 	if(!this.queue->isEmpty()){
 		//permet de reveiller le premier element de la liste des threads qui sont en attente sur le sema
 		g_scheduler->ReadyToRun(this.queue->Remove());
-		
 	}
 	else{
 		//on incrémente notre compteur de semaphore
 		this.value=this.value+1;
 	}
-	
-	
-	
-	
+
 	#endif
-	
+  #ifndef ETUDIANT_TP
    printf("**** Warning: method Semaphore::V is not implemented yet\n");
     exit(-1);
+  #endif
 }
 
 //----------------------------------------------------------------------
@@ -260,5 +261,3 @@ void Condition::Broadcast() {
   printf("**** Warning: method Condition::Broadcast is not implemented yet\n");
   exit(-1);
 }
-
-

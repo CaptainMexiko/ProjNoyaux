@@ -217,8 +217,9 @@ void Lock::Release() {
 			free=true;
 		}
 		else {
-			
-			g_scheduler->ReadyToRun(sleepqueue->Remove());
+			Thread tmp= sleepqueue->Remove();
+			owner=tmp;
+			g_scheduler->ReadyToRun(tmp);
 		}
 	}
 	#endif

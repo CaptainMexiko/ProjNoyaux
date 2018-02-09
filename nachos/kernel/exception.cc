@@ -626,7 +626,25 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 	  }
 	  break;
 	}
-
+	
+	#ifdef ETUDIANT_TP
+	case SC_P :
+		//message debug
+		DEBUG('e', (char *)"Semaphore: Use of P().\n");
+		//lecture parametre dans registre r4
+		int32_t idSema=g_machine->ReadIntRegister(4);
+		
+		//si l'objet correspondant à idSema est de type semaphore
+		if(g_object_ids->SearchObject(idSema)->type == SEMAPHORE_TYPE){
+			
+			
+		}
+		
+		
+		break;
+	#endif	
+	//TODO appels systemes conditions
+	
        default:
          printf("Invalid system call number : %d\n", type);
          exit(ERROR);

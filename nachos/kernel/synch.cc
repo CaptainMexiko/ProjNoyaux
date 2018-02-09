@@ -188,7 +188,7 @@ void Lock::Acquire() {
 	}
 	else{
 		free=false;
-		owner=g_current_thread;
+		this.owner=g_current_thread;
 	}
 	
 	#endif

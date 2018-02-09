@@ -81,16 +81,17 @@ Semaphore::P() {
   #ifdef ETUDIANT_TP
   //on désactive les interruptions (interrupt.cc, interrupt.h
   g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
-  if(this.value<0){
+  if(value<0){
+  	//on met le thread en queue de file
+  	queue->Append(g_current_thread);
   	//on endort le thread
   	g_current_thread->Sleep();
-  	//puis on met le thread en queue de file
-  	this.queue->Append(g_current_thread);
+  	
   }
   else{
 
   	//on décremente notre compteur de semaphore
-  	this.value--;
+  	value--;
 
   }
 
@@ -118,14 +119,14 @@ Semaphore::V() {
   //on désactive les interruptions (interrupt.cc, interrupt.h
   g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   //On vérifie qu'il y ait des threads en attentes sur le sémaphore
-	if(!this.queue->isEmpty()){
+	if(!queue->isEmpty()){
 		//permet de reveiller le premier element de la liste des threads qui sont en attente sur le sema
-		g_scheduler->ReadyToRun(this.queue->Remove());
+		g_scheduler->ReadyToRun(queue->Remove());
 
 	}
 	else{
 		//on incrémente notre compteur de semaphore
-		this.value=this.value+1;
+		value=value+1;
 	}
 
 	#endif
@@ -177,8 +178,25 @@ Lock::~Lock() {
 */
 //----------------------------------------------------------------------
 void Lock::Acquire() {
+	#ifdef ETUDIANT_TP
+	//on désactive les interruptions (interrupt.cc, interrupt.h
+ 	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+ 	
+	if(!free){
+		sleepqueue->Append(g_current_thread);
+		g_current_thread->Sleep();
+	}
+	else{
+		free=false;
+		owner=g_current_thread;
+	}
+	
+	#endif
+	
+	#ifndef ETUDIANT_TP
    printf("**** Warning: method Lock::Acquire is not implemented yet\n");
     exit(-1);
+    	#endif
 }
 
 //----------------------------------------------------------------------
@@ -191,8 +209,24 @@ void Lock::Acquire() {
 */
 //----------------------------------------------------------------------
 void Lock::Release() {
+	#ifdef ETUDIANT_TP
+	//desactive interruptions
+	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+	if(isHeldByCurrentThread){
+		if(sleepqueue->isEmpty()){
+			free=true;
+		}
+		else {
+			
+			g_scheduler->ReadyToRun(sleepqueue->Remove());
+		}
+	}
+	#endif
+	
+	#ifndef ETUDIANT_TP
     printf("**** Warning: method Lock::Release is not implemented yet\n");
     exit(-1);
+    	#endif
 }
 
 //----------------------------------------------------------------------

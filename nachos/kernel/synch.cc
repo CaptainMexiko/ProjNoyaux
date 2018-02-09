@@ -117,18 +117,18 @@ Semaphore::V() {
 	if(!this.queue->isEmpty()){
 		//permet de reveiller le premier element de la liste des threads qui sont en attente sur le sema
 		g_scheduler->ReadyToRun(this.queue->Remove());
-		
+
 	}
 	else{
 		//on incrémente notre compteur de semaphore
 		this.value=this.value+1;
 	}
-	
-	
-	
-	
+
+
+
+
 	#endif
-	
+
    printf("**** Warning: method Semaphore::V is not implemented yet\n");
     exit(-1);
 }
@@ -260,5 +260,3 @@ void Condition::Broadcast() {
   printf("**** Warning: method Condition::Broadcast is not implemented yet\n");
   exit(-1);
 }
-
-

@@ -700,7 +700,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 
     //utilisation de GetStringParam et GetLengthParam pour recuperer le contenu de la chaine de caractere reg_debug_name et la taille de reg_count
     int tailleDuParam=GetLengthParam(reg_debug_name);
-    char nomParam[tailleDuParam]=GetStringParam(reg_debug_name,nomParam,tailleDuParam);
+    char nomParam[tailleDuParam];
+    GetStringParam(reg_debug_name,nomParam,tailleDuParam);
 
     //création de mon sémaphore
     Semaphore *sem = new Semaphore(reg_debug_name, reg_count);

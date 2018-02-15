@@ -640,7 +640,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 
     //si l'objet correspondant à idSema est de type semaphore
     if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
-        //appel V sur le semaphore
+        //appel P sur le semaphore
         pointeurDeSemaphore->P();
 
         //pas d'erreur

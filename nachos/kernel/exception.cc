@@ -636,7 +636,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
     //lecture parametre dans registre r4
     int32_t idSema=g_machine->ReadIntRegister(4);
     //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
-    Semaphore * pointeurDeSemaphore = g_object_ids->SearchObject(idSema);
+    Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(idSema);
 
     //si l'objet correspondant à idSema est de type semaphore
     if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
@@ -666,7 +666,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 		//lecture parametre dans registre r4
 		int32_t idSema=g_machine->ReadIntRegister(4);
     //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
-    Semaphore * pointeurDeSemaphore = g_object_ids->SearchObject(idSema);
+    Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(idSema);
 
 		//si l'objet correspondant à idSema est de type semaphore
 		if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
@@ -720,6 +720,33 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 
   #ifdef ETUDIANT_TP
   case SC_SEM_DESTROY:
+
+  //message debug
+  DEBUG('e', (char *)"System call: Use of SEM_DESTROY().\n");
+  //recupere le sema r4
+  int32_t reg_sema=g_machine->ReadIntRegister(4);
+
+  //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
+  Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(reg_sema);
+
+  //si l'objet correspondant à idSema est de type semaphore on peut supprimer
+  if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
+      //on supprime le semaphore de g_object_ids
+      g_object_ids->RemoveObject(reg_sema);
+
+      //et on peut supprimer le sempaphore
+      pointeurDeSemaphore->~Semaphore();
+
+      //pas d'erreur
+      g_machine->WriteIntRegister(2,0);
+      g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
+  }
+  else{
+      //Si l'objet n'est pas de type sémaphore on retourne l'erreur disant que l'id mise en paramètres est mauvais
+      g_machine->WriteIntRegister(2, ERROR);
+      g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
+  }
 
   break;
   #endif

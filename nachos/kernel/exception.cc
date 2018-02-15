@@ -628,35 +628,50 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 	}
 
 	#ifdef ETUDIANT_TP
-	case SC_P :
-		//message debug
-		DEBUG('e', (char *)"Semaphore: Use of P().\n");
-		//lecture parametre dans registre r4
-		int32_t idSema=g_machine->ReadIntRegister(4);
+  case SC_P :
+    //message debug
+    DEBUG('e', (char *)"Semaphore: Use of P().\n");
+    //lecture parametre dans registre r4
+    int32_t idSema=g_machine->ReadIntRegister(4);
+    //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
+    Semaphore * pointeurDeSemaphore = g_object_ids->SearchObject(idSema);
 
-		//si l'objet correspondant à idSema est de type semaphore
-		if(g_object_ids->SearchObject(idSema)->type == SEMAPHORE_TYPE){
+    //si l'objet correspondant à idSema est de type semaphore
+    if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
+        //appel V sur le semaphore
+        pointeurDeSemaphore->P();
 
+        //pas d'erreur
+        g_machine->WriteIntRegister(2,0);
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
 
-		}
-		else{
+    }
+    else{
         //Si l'objet n'est pas de type sémaphore on retourne l'erreur disant que l'id mise en paramètres est mauvais
         g_machine->WriteIntRegister(2, ERROR);
         g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
     }
-		break;
+    break;
 	#endif
 
   #ifdef ETUDIANT_TP
+
 	case SC_V :
 		//message debug
 		DEBUG('e', (char *)"Semaphore: Use of V().\n");
 		//lecture parametre dans registre r4
 		int32_t idSema=g_machine->ReadIntRegister(4);
+    //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
+    Semaphore * pointeurDeSemaphore = g_object_ids->SearchObject(idSema);
 
 		//si l'objet correspondant à idSema est de type semaphore
-		if(g_object_ids->SearchObject(idSema)->type == SEMAPHORE_TYPE){
+		if(pointeurDeSemaphore->type == SEMAPHORE_TYPE){
+        //appel V sur le semaphore
+        pointeurDeSemaphore->V();
 
+        //pas d'erreur
+        g_machine->WriteIntRegister(2,0);
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
 
 		}
 		else{
@@ -665,6 +680,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
         g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
     }
 		break;
+
+
 	#endif
 	//TODO appels systemes conditions
 

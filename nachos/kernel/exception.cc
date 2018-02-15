@@ -627,6 +627,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 	  break;
 	}
 
+
+ //***********************************************************************Exceptions ETUDIANT_TP**************************************************************
 	#ifdef ETUDIANT_TP
   case SC_P :
     //message debug
@@ -653,6 +655,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
     }
     break;
 	#endif
+
+
 
   #ifdef ETUDIANT_TP
 
@@ -683,7 +687,99 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 
 
 	#endif
-	//TODO appels systemes conditions
+
+
+  #ifdef ETUDIANT_TP
+  case SC_SEM_CREATE:
+
+    //message debug
+    DEBUG('e', (char *)"System call: Use of SEM_CREATE().\n");
+    //recupere le debug_name et le count dans registre r4 et r5
+		int32_t reg_debug_name=g_machine->ReadIntRegister(4);
+    int32_t reg_count=g_machine->ReadIntRegister(5);
+
+    //utilisation de GetStringParam et GetLengthParam pour recuperer le contenu de la chaine de caractere reg_debug_name et la taille de reg_count
+    int tailleDuParam=GetLengthParam(reg_debug_name);
+    char nomParam[tailleDuParam]=GetStringParam(reg_debug_name,nomParam,tailleDuParam);
+
+    //création de mon sémaphore
+    Semaphore *sem = new Semaphore(reg_debug_name, reg_count);
+
+    //on ajoute le semaphore
+    int32_t ajoutSemaId = g_object_ids->AddObject(sem);
+
+    //si l'id mise en paramètres est valide alors pas d'erreur
+    g_machine->WriteIntRegister(2,ajoutSemaId);
+    g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
+    break;
+
+  #endif
+
+
+  #ifdef ETUDIANT_TP
+  case SC_SEM_DESTROY:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_LOCK_CREATE:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_LOCK_DESTROY:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_LOCK_ACQUIRE:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_LOCK_RELEASE:
+
+  break;
+  #endif
+
+ //TODO appels conditions
+ /****************************************************************CONDITIONS*****************************
+  #ifdef ETUDIANT_TP
+  case SC_COND_CREATE:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_COND_DESTROY:
+
+  break;
+  #endif
+
+
+  #ifdef ETUDIANT_TP
+  case SC_COND_WAIT:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_COND_SIGNAL:
+
+  break;
+  #endif
+
+  #ifdef ETUDIANT_TP
+  case SC_COND_BROADCAST:
+
+  break;
+  #endif
+ */
 
        default:
          printf("Invalid system call number : %d\n", type);

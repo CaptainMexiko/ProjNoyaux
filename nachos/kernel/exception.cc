@@ -634,7 +634,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
     //message debug
     DEBUG('e', (char *)"Semaphore: Use of P().\n");
     //lecture parametre dans registre r4
-    int32_t idSema=g_machine->ReadIntRegister(4);
+    SemId idSema=(SemId)g_machine->ReadIntRegister(4);
     //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
     Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(idSema);
 
@@ -664,7 +664,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 		//message debug
 		DEBUG('e', (char *)"Semaphore: Use of V().\n");
 		//lecture parametre dans registre r4
-		int32_t idSema=g_machine->ReadIntRegister(4);
+		SemId idSema=(SemId)g_machine->ReadIntRegister(4);
     //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
     Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(idSema);
 
@@ -724,7 +724,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
   //message debug
   DEBUG('e', (char *)"System call: Use of SEM_DESTROY().\n");
   //recupere le sema r4
-  int32_t reg_sema=g_machine->ReadIntRegister(4);
+  SemId reg_sema=(SemId)g_machine->ReadIntRegister(4);
+
 
   //on stocke notre objet quand on le cherche, on recupere le semaphore de g_object_ids
   Semaphore * pointeurDeSemaphore = (Semaphore *)g_object_ids->SearchObject(reg_sema);
@@ -782,7 +783,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
   //message debug
   DEBUG('e', (char *)"System call: Use of SC_LOCK_DESTROY().\n");
   //recupere le lockid en r4
-  int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+  LockId reg_lock_id=(LockId)g_machine->ReadIntRegister(4);
 
   //on stocke notre objet quand on le cherche, on recupere le lock id
   Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);
@@ -816,7 +817,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
     //message debug
     DEBUG('e', (char *)"System call: Use of SC_LOCK_ACQUIRE().\n");
     //recupere le lockid en r4
-    int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+    LockId reg_lock_id=(LockId)g_machine->ReadIntRegister(4);
 
     //on stocke notre objet quand on le cherche, on recupere le lock id
     Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);
@@ -846,7 +847,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
   //message debug
   DEBUG('e', (char *)"System call: Use of SC_LOCK_RELEASE().\n");
   //recupere le lockid en r4
-  int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+  LockId reg_lock_id=(LockId)g_machine->ReadIntRegister(4);
 
   //on stocke notre objet quand on le cherche, on recupere le lock id
   Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);

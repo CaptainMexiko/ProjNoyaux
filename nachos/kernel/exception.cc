@@ -754,11 +754,58 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
   #ifdef ETUDIANT_TP
   case SC_LOCK_CREATE:
 
+    //message debug
+    DEBUG('e', (char *)"System call: Use of SC_LOCK_CREATE().\n");
+    //recupere le nom du lock en r4
+    int32_t reg_debug_name=g_machine->ReadIntRegister(4);
+    //utilisation de GetStringParam et GetLengthParam pour recuperer le contenu de la chaine de caractere reg_debug_name et la taille de reg_count
+    int tailleDuParam=GetLengthParam(reg_debug_name);
+    char nomParam[tailleDuParam];
+    GetStringParam(reg_debug_name,nomParam,tailleDuParam);
+
+    //création du lock
+    Lock *lock = new Lock(reg_debug_name);
+
+    //on ajoute le lock
+    int32_t ajoutLockId = g_object_ids->AddObject(lock);
+
+    //si l'id mise en paramètres est valide alors pas d'erreur
+    g_machine->WriteIntRegister(2,ajoutLockId);
+    g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
   break;
   #endif
 
   #ifdef ETUDIANT_TP
   case SC_LOCK_DESTROY:
+
+  //message debug
+  DEBUG('e', (char *)"System call: Use of SC_LOCK_DESTROY().\n");
+  //recupere le lockid en r4
+  int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+
+  //on stocke notre objet quand on le cherche, on recupere le lock id
+  Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);
+
+  //si l'objet correspondant à idSema est de type semaphore on peut supprimer
+  if(pointeurDeLock->type == LOCK_TYPE){
+      //on supprime le lock de g_object_ids
+      g_object_ids->RemoveObject(reg_lock_id);
+
+      //et on peut supprimer le lock
+      pointeurDeLock->~Lock();
+
+      //pas d'erreur
+      g_machine->WriteIntRegister(2,0);
+      g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
+  }
+  else{
+      //Si l'objet n'est pas de type lock on retourne l'erreur disant que l'id mise en paramètres est mauvais
+      g_machine->WriteIntRegister(2, ERROR);
+      g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
+  }
+
 
   break;
   #endif
@@ -766,11 +813,59 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
   #ifdef ETUDIANT_TP
   case SC_LOCK_ACQUIRE:
 
+    //message debug
+    DEBUG('e', (char *)"System call: Use of SC_LOCK_ACQUIRE().\n");
+    //recupere le lockid en r4
+    int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+
+    //on stocke notre objet quand on le cherche, on recupere le lock id
+    Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);
+
+    if(pointeurDeLock->type == LOCK_TYPE){
+
+        //on acquire le locks
+        pointeurDeLock->Acquire();
+
+        //pas d'erreur
+        g_machine->WriteIntRegister(2,0);
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
+    }
+    else{
+        //Si l'objet n'est pas de type lock on retourne l'erreur disant que l'id mise en paramètres est mauvais
+        g_machine->WriteIntRegister(2, ERROR);
+        g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
+    }
+
   break;
   #endif
 
   #ifdef ETUDIANT_TP
   case SC_LOCK_RELEASE:
+
+  //message debug
+  DEBUG('e', (char *)"System call: Use of SC_LOCK_RELEASE().\n");
+  //recupere le lockid en r4
+  int32_t reg_lock_id=g_machine->ReadIntRegister(4);
+
+  //on stocke notre objet quand on le cherche, on recupere le lock id
+  Lock * pointeurDeLock = (Lock *)g_object_ids->SearchObject(reg_lock_id);
+
+  if(pointeurDeLock->type == LOCK_TYPE){
+
+      //on acquire le locks
+      pointeurDeLock->Release();
+
+      //pas d'erreur
+      g_machine->WriteIntRegister(2,0);
+      g_syscall_error->SetMsg((char*)"",NO_ERROR);
+
+  }
+  else{
+      //Si l'objet n'est pas de type lock on retourne l'erreur disant que l'id mise en paramètres est mauvais
+      g_machine->WriteIntRegister(2, ERROR);
+      g_syscall_error->SetMsg((char*)"",INVALID_SEMAPHORE_ID);
+  }
 
   break;
   #endif

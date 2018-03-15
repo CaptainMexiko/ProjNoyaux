@@ -81,7 +81,7 @@ Semaphore::P() {
   #ifdef ETUDIANTS_TP
   //on désactive les interruptions (interrupt.cc, interrupt.h
   IntStatus valeurInterruptions = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
-  if(value<=0){
+  if(value==0){
   	//on met le thread en queue de file
   	queue->Append(g_current_thread);
   	//on endort le thread

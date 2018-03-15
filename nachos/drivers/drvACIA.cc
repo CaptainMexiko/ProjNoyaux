@@ -68,19 +68,19 @@ int DriverACIA::TtySend(char* buff)
 
   memcpy(&send_buffer, &buff, sizeof buff);
 
+  send_sema->P();
   while (send_buffer[ind_send] != '\0') {
-    send_sema->P();
     if (g_machine->acia->GetOutputStateReg() == EMPTY) {
       g_machine->acia->PutChar(send_buffer[ind_send]);
       ind_send++;
       number_send++;
     }
-    send_sema->V();
   }
+  send_sema->V();
 
+  ind_send = 0;
   return number_send;
   #endif
-
 
   #ifndef ETUDIANTS_TP
   printf("**** Warning: contructor of the ACIA driver not implemented yet\n");
@@ -105,12 +105,21 @@ int DriverACIA::TtyReceive(char* buff,int lg)
     printf("ACIA n'est pas en mode attente active\n");
     exit(-1);
   }
-
+  receive_sema->P();
   while (ind_rec < lg) {
     if (g_machine->acia->GetInputStateReg() == FULL) {
-      
+        char get = g_machine->acia->GetChar(receive_buffer[ind_rec]);
+        if (get == '\0') {
+          receive_buffer[ind_rec];
+          
+        }
+        ind_rec++;
+        number_read++;
     }
   }
+  receive_sema->V();
+
+  ind_rec = 0;
   return number_read;
   #endif
 

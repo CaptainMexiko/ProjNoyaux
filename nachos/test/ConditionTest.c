@@ -6,11 +6,13 @@ CondId cond;
 VoidNoArgFunctionPtr worker(){
   n_printf("Work to be done");
   CondSignal(cond);
+  return 0;
 }
 
 VoidNoArgFunctionPtr testSignal(){
   CondWait(cond);
   n_printf("Test de la condition");
+  return 0;
 }
 
 int main() {

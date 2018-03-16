@@ -66,19 +66,21 @@ int DriverACIA::TtySend(char* buff)
     exit(-1);
   }
 
-  memcpy(&send_buffer, &buff, sizeof buff);
-
-  send_sema->P();
-  while (send_buffer[ind_send] != '\0') {
+  DEBUG('d', (char *) "Début de l'envoie en attente active (driver ACIA)\n");
+  while (buff[ind_send] != '\0') {
+    DEBUG('d', (char *) "Début de la boucle \n");
     if (g_machine->acia->GetOutputStateReg() == EMPTY) {
-      g_machine->acia->PutChar(send_buffer[ind_send]);
+      char debug = buff[ind_send];
+      DEBUG('d', (char *) "Envoie du char %c\n", debug);
+      g_machine->acia->PutChar(buff[ind_send]);
       ind_send++;
       number_send++;
     }
   }
-  send_sema->V();
 
+  DEBUG('d', (char *) "Fin de l'envoie\n");
   ind_send = 0;
+  DEBUG('d', (char *) "On return %d", number_send);
   return number_send;
   #endif
 
@@ -105,21 +107,23 @@ int DriverACIA::TtyReceive(char* buff,int lg)
     printf("ACIA n'est pas en mode attente active\n");
     exit(-1);
   }
-  receive_sema->P();
+
   while (ind_rec < lg) {
     if (g_machine->acia->GetInputStateReg() == FULL) {
-        char get = g_machine->acia->GetChar(receive_buffer[ind_rec]);
+        char get = g_machine->acia->GetChar();
+        DEBUG('d', (char *) "Le char %c à été reçu", get);
         if (get == '\0') {
-          receive_buffer[ind_rec];
-          
+          buff[ind_rec] = get;
+          break;
         }
+        buff[ind_rec] = get;
         ind_rec++;
         number_read++;
     }
   }
-  receive_sema->V();
 
   ind_rec = 0;
+  DEBUG('d', (char *) "Fin de la réception");
   return number_read;
   #endif
 

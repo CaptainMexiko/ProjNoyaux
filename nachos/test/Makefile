@@ -5,7 +5,7 @@
 #
 # To add generate a new program, just update the PROGRAMS target below
 
-PROGRAMS = halt hello shell matmult sort SemaphoreWait LockTest SemaphoreProdConso TestCreaDestr ConditionTest 
+PROGRAMS = halt hello shell matmult sort SemaphoreWait LockTest SemaphoreProdConso TestCreaDestr ConditionTest TtySendTest TtyReceiveTest
 
 all: $(PROGRAMS)
 

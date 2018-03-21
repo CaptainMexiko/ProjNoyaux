@@ -76,15 +76,14 @@ int DriverACIA::TtySend(char* buff) {
       ind_send = 0;
       DEBUG('d', (char *) "On return %d", number_send);
     }
-    else if(g_machine->acia->GetWorkingMode() == SEND_INTERRUPT){
+    else {
+        send_sema->P();
         memcpy(&send_buffer, &buff, sizeof buff);
         number_send = sizeof buff;
-        send_sema->P();
+        g_machine->acia->SetWorkingMode(SEND_INTERRUPT);
+        g_machine->acia->PutChar(send_buffer[ind_send]);
     }
-    else{
-      printf("L'acia n'est pas en mode busywaiting ou n'autorise pas les interruptions.\n");
-      exit(-1);
-    }
+
   return number_send;
   #endif
 
@@ -126,9 +125,10 @@ int DriverACIA::TtyReceive(char* buff,int lg)
   DEBUG('d', (char *) "Fin de la réception, on a lu %d charactères", number_read);
   }
 
-  else if(g_machine->acia->GetWorkingMode() == REC_INTERRUPT){
+  else{
     receive_sema->P();
     memcpy(&buff, &receive_buffer, sizeof receive_buffer);
+    g_machine->acia->SetWorkingMode(REC_INTERRUPT);
   }
 
 
@@ -155,11 +155,12 @@ void DriverACIA::InterruptSend()
 
 #ifdef ETUDIANTS_TP
 {
-  while(send_buffer[ind_send] != '\0'){
-    ind_send++;
-    g_machine->acia->PutChar(send_buffer[ind_send]);
-  }
+  ind_send++;
+  g_machine->acia->PutChar(send_buffer[ind_send]);
+  if(send_buffer[ind_send] != '\0'){
+    g_machine->acia->SetWorkingMode(REC_INTERRUPT);
     send_sema->V();
+  }
 }
 #endif
 

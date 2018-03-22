@@ -81,10 +81,8 @@ int DriverACIA::TtySend(char* buff) {
         send_sema->P();
         ind_send = 0;
         strcpy(send_buffer, buff);
-        printf("send_buffer : %s\n", send_buffer);
         number_send = sizeof buff + 1;
         g_machine->acia->SetWorkingMode(SEND_INTERRUPT);
-         printf("Mode de ACIA : %d\n", g_machine->acia->GetWorkingMode());
         g_machine->acia->PutChar(send_buffer[ind_send]);
         }
 

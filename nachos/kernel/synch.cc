@@ -79,9 +79,11 @@ void
 Semaphore::P() {
 
   #ifdef ETUDIANTS_TP
+  DEBUG('s', (char *) "Debut du P sur le semaphore %s \n", name);
   //on désactive les interruptions (interrupt.cc, interrupt.h
   IntStatus valeurInterruptions = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   if(value==0){
+    DEBUG('s', (char *) "La valeur du semaphore vaut %d, on bloque\n", value);
   	//on met le thread en queue de file
   	queue->Append(g_current_thread);
   	//on endort le thread
@@ -89,10 +91,9 @@ Semaphore::P() {
 
   }
   else{
-
   	//on décremente notre compteur de semaphore
   	value--;
-
+    DEBUG('s', (char *) "On passe la valeur du semaphore a %d\n", value);
   }
     //récupère l'ancienne valeur avant de off l'interruptions en ligne 83, et donc passe en on
     g_machine->interrupt->SetStatus(valeurInterruptions);
@@ -118,17 +119,19 @@ void
 Semaphore::V() {
 
 	#ifdef ETUDIANTS_TP
+    DEBUG('s', (char *) "Debut du V sur le semaphore %s \n", name);
   //on désactive les interruptions (interrupt.cc, interrupt.h
   IntStatus valeurInterruptions = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   //On vérifie qu'il y ait des threads en attentes sur le sémaphore
 	if(!queue->IsEmpty()){
+	    DEBUG('s', (char *) "On debloque le permier Thread en attente");
 		//permet de reveiller le premier element de la liste des threads qui sont en attente sur le sema
 		g_scheduler->ReadyToRun((Thread *)queue->Remove());
-
 	}
 	else{
 		//on incrémente notre compteur de semaphore
 		value=value+1;
+		DEBUG('s', (char *) "On passe la valeur du semaphore a %d\n", value);
 	}
 
   //récupère l'ancienne valeur avant de off l'interruptions en ligne 83, et donc passe en on

@@ -42,6 +42,7 @@ DriverACIA::DriverACIA()
   receive_sema = new Semaphore((char *) "Semaphore de receive pour DriverACIA", 1);
   ind_send = 0;
   ind_rec = 0;
+    g_machine->acia->SetWorkingMode(REC_INTERRUPT);
   #endif
 
   #ifndef ETUDIANTS_TP
@@ -59,8 +60,8 @@ DriverACIA::DriverACIA()
 int DriverACIA::TtySend(char* buff) {
 #ifdef ETUDIANTS_TP
     int number_send = 0;
-
-    if (g_machine->acia->GetWorkingMode() == BUSY_WAITING) {
+    switch(g_cfg->ACIA){
+    case ACIA_BUSY_WAITING: {
       DEBUG('d', (char *) "Début de l'envoie en attente active (driver ACIA)\n");
       while (buff[ind_send] != '\0') {
         DEBUG('d', (char *) "Début de la boucle \n");
@@ -72,16 +73,18 @@ int DriverACIA::TtySend(char* buff) {
           number_send++;
         }
       }
+      //g_machine->acia->PutChar(buff[ind_send]);
       DEBUG('d', (char *) "Fin de l'envoie en mode BusyWaiting\n");
       ind_send = 0;
       DEBUG('d', (char *) "On return %d", number_send);
     }
-    else {
+    case ACIA_INTERRUPT: {
         send_sema->P();
         memcpy(&send_buffer, &buff, sizeof buff);
         number_send = sizeof buff;
         g_machine->acia->SetWorkingMode(SEND_INTERRUPT);
         g_machine->acia->PutChar(send_buffer[ind_send]);
+    }
     }
 
   return number_send;
@@ -106,16 +109,17 @@ int DriverACIA::TtyReceive(char* buff,int lg)
   #ifdef ETUDIANTS_TP
   int number_read = 0;
 
-  if (g_machine->acia->GetWorkingMode() == BUSY_WAITING) {
+  switch(g_cfg->ACIA){
+  case ACIA_BUSY_WAITING: {
     DEBUG('d', (char *) "Début de la réception en mode attente active (driver ACIA) \n");
     while (number_read < lg) {
       if (g_machine->acia->GetInputStateReg() == FULL) {
           char get = g_machine->acia->GetChar();
           DEBUG('d', (char *) "Le char %c à été reçu", get);
           if (get == '\0') {
-            DEBUG('d', (char *) "Fin de la chaîne en avance, on s'arrète \n");
             buff[number_read] = get;
-            break;
+            DEBUG('d', (char *) "Fin de la chaîne en avance, on s'arrète \n");
+            return number_read++;
           }
           buff[number_read] = get;
           number_read++;
@@ -125,10 +129,12 @@ int DriverACIA::TtyReceive(char* buff,int lg)
   DEBUG('d', (char *) "Fin de la réception, on a lu %d charactères", number_read);
   }
 
-  else{
+  case ACIA_INTERRUPT :{
+    printf("TEst");
     receive_sema->P();
     memcpy(&buff, &receive_buffer, sizeof receive_buffer);
     g_machine->acia->SetWorkingMode(REC_INTERRUPT);
+  }
   }
 
 

@@ -129,8 +129,7 @@ int DriverACIA::TtyReceive(char* buff,int lg)
 
   else{
     receive_sema->P();
-    printf("Test");
-    strcpy(buff, receive_buffer);
+    memcpy(buff, receive_buffer, sizeof receive_buffer);
     g_machine->acia->SetWorkingMode(REC_INTERRUPT);
   }
 

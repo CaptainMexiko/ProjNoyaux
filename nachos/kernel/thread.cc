@@ -404,25 +404,12 @@ void
 Thread::SaveProcessorState()
 {
   #ifdef ETUDIANTS_TP
-/*  //Sauvegarde dans le contexte du thread les valeurs des registres int du processeur
-  for (int i = 0; i < NUM_INT_REGS; i++) {
-    thread_context.int_registers[i] = g_machine->int_registers[i];
-  }
-
-  //Sauvegarde dans le contexte du thread les valeurs des registres float du processeur
-  for (int i = 0; i < NUM_FP_REGS; i++) {
-    thread_context.float_registers[i] = g_machine->float_registers[i];
-  }
-
-  //Sauvegarde dans le contexte du thread de la valeur du condition code du processeur
-  thread_context.cc = g_machine->cc;
-  */
 
 //on copie tout les registres depuis l'emulation machine
   memcpy(thread_context.int_registers, g_machine->int_registers, sizeof(thread_context.int_registers));
-	memcpy(thread_context.float_registers, g_machine->float_registers, sizeof(thread_context.float_registers));
-	memcpy(&thread_context.cc, &g_machine->cc, sizeof(thread_context.cc));
-
+  memcpy(thread_context.float_registers, g_machine->float_registers, sizeof(thread_context.float_registers));
+  memcpy(&thread_context.cc, &g_machine->cc, sizeof(thread_context.cc));
+  GetProcessOwner()->addrspace->translationTable = g_machine->mmu->translationTable;
   #endif
 
   #ifndef ETUDIANTS_TP
@@ -442,29 +429,13 @@ Thread::RestoreProcessorState()
 {
 
   #ifdef ETUDIANTS_TP
-  /*
-  //Restoration dans le contexte du processeur les valeurs des registres int du thread
-  for (int i = 0; i < NUM_INT_REGS; i++) {
-    g_machine->int_registers[i] = thread_context.int_registers[i];
-  }
 
-  //Restoration dans le contexte du processeur les valeurs des registres float du thread
-  for (int i = 0; i < NUM_FP_REGS; i++) {
-    g_machine->float_registers = thread_context.float_registers;
-  }
-
-  //Restoration dans le contexte du processeur de la valeur du condition code du thread
-  g_machine->cc = thread_context.cc;
-  */
-  //on recup les registres qui ont ete sauvegardé
+  //on recupère les registres qui ont ete sauvegardé
   memcpy(g_machine->int_registers, thread_context.int_registers, sizeof(thread_context.int_registers));
   memcpy(g_machine->float_registers, thread_context.float_registers, sizeof(thread_context.float_registers));
   memcpy(&g_machine->cc, &thread_context.cc, sizeof(thread_context.cc));
 
-  //on créer un pointeur sur la table de translation des threads
-  //TranslationTable *pointeurTableTranslation = GetProcessOwner()->addrspace->pointeurTableTranslation
-  //et on envoie le tout dans la MMU
-  //g_machine->MMU->translationTable = pointeurTableTranslation;
+   g_machine->mmu->translationTable = GetProcessOwner()->addrspace->translationTable;
 
   #endif
 

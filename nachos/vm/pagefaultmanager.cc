@@ -56,9 +56,8 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
   else if(!g_machine->mmu->translationTable->getBitSwap(virtualPage) && g_machine->mmu->translationTable->getAddrDisk(virtualPage)==-1){
 
       int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, 1);
-      bzero(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), sizeof g_cfg->PageSize);
+      memset(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), 0, g_cfg->PageSize);
       g_machine->mmu->translationTable->setPhysicalPage(virtualPage,pp);
-
       g_machine->mmu->translationTable->setBitValid(virtualPage);
   }
 

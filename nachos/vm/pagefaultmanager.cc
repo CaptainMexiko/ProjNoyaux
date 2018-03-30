@@ -41,9 +41,30 @@ PageFaultManager::~PageFaultManager() {
 */  
 ExceptionType PageFaultManager::PageFault(uint32_t virtualPage) 
 {
+#ifdef ETUDIANTS_TP
+
+  //chargement page manquante en zone swap
+  if(g_machine->mmu->translationTable->getBitSwap(virtualPage)){
+    char * buff_tmp;
+    g_swap_manager->GetPageSwap(g_machine->mmu->translationTable->getAddrDisk(virtualPage), buff_tmp);
+    int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, 1);
+
+	  //memcpy(&g_physical_mem_manager->tpr[pp], &buff_tmp, sizeof buff_tmp)
+
+	  g_machine->mmu->translationTable->setBitValid(virtualPage);
+  }
+  else if(!g_machine->mmu->translationTable->getBitSwap(virtualPage) && g_machine->mmu->translationTable->getAddrDisk(virtualPage)==-1){ g_machine->mmu->translationTable->setBitValid(virtualPage);}
+
+
+return ((ExceptionType)0);
+
+#endif
+
+#ifndef ETUDIANTS_TP
   printf("**** Warning: page fault manager is not implemented yet\n");
     exit(-1);
     return ((ExceptionType)0);
+#endif
 }
 
 

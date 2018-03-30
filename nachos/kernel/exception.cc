@@ -895,8 +895,6 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 }
   #endif
 
- //TODO appels conditions
-
   #ifdef ETUDIANTS_TP
   case SC_COND_CREATE:
   {

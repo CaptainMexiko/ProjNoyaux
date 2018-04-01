@@ -120,7 +120,7 @@ void PhysicalMemManager::ChangeOwner(long numPage, Thread* owner) {
 //-----------------------------------------------------------------
 int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtualPage) 
 {
-#ifdef ERUDIANTS_TP
+#ifdef ETUDIANTS_TP
 
     int new_page = FindFreePage();
     tpr[new_page].locked = true;

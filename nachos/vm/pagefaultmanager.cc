@@ -48,15 +48,15 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
     char * buff_tmp;
     g_swap_manager->GetPageSwap(g_machine->mmu->translationTable->getAddrDisk(virtualPage), buff_tmp);
     int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, 1);
-
-	  //memcpy(&g_physical_mem_manager->tpr[pp], &buff_tmp, sizeof buff_tmp)
-
-	  g_machine->mmu->translationTable->setBitValid(virtualPage);
+    memcpy(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)]), &buff_tmp, sizeof(buff_tmp));
+    g_machine->mmu->translationTable->setPhysicalPage(virtualPage, pp);
+    g_machine->mmu->translationTable->setBitValid(virtualPage);
   }
   else if(!g_machine->mmu->translationTable->getBitSwap(virtualPage) && g_machine->mmu->translationTable->getAddrDisk(virtualPage)==-1){
 
       int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, 1);
-      memset(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), 0, g_cfg->PageSize);
+      memset(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), 0,
+             static_cast<size_t>(g_cfg->PageSize));
       g_machine->mmu->translationTable->setPhysicalPage(virtualPage,pp);
       g_machine->mmu->translationTable->setBitValid(virtualPage);
   }

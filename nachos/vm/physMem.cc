@@ -130,7 +130,7 @@ int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtual
     }
     tpr[new_page].owner = owner;
     tpr[new_page].virtualPage = virtualPage;
-    tpr[new_page].locked = false;
+    UnlockPage(new_page);
 
 
 #endif
@@ -183,9 +183,38 @@ int PhysicalMemManager::FindFreePage() {
 */
 //-----------------------------------------------------------------
 int PhysicalMemManager::EvictPage() {
+
+    Semaphore * sema_voleur = new Semaphore( (char *) "Semaphore pour le voleur de page", 1);
+
+#ifdef ETUDIANTS_TP
+    int old_value = i_clock;
+    bool process_end = false;
+    while (!process_end){
+        while (g_machine->mmu->translationTable->getBitU(tpr[i_clock].virtualPage)){
+            if (i_clock == sizeof(tpr)){
+                i_clock = 0;
+            }
+            i_clock++;
+        }
+        for (int i = old_value; i < i_clock; ++i) {
+            g_machine->mmu->translationTable->clearBitU(tpr[i_clock].virtualPage);
+        }
+        if (tpr[i_clock].locked == false){
+            //g_swap_manager->PutPageSwap(-1,g_machine->mainMemory[] );
+            process_end = true;
+        }
+        else {
+        DEBUG('v', (char *) "La page numero %d est lock", i_clock);
+        }
+    }
+    return (i_clock);
+#endif
+
+#ifndef ETUDIANTS_TP
   printf("**** Warning: page replacement algorithm is not implemented yet\n");
     exit(-1);
     return (0);
+#endif
 }
 
 //-----------------------------------------------------------------

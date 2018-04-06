@@ -123,12 +123,13 @@ int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtual
 #ifdef ETUDIANTS_TP
 
     int new_page = FindFreePage();
-    tpr[new_page].locked = true;
     if(new_page == -1){
         new_page = EvictPage();
         DEBUG('v', (char *) "Eviction de page, nouvelle page a le numero : %d", new_page);
     }
+    tpr[new_page].locked = true;
     tpr[new_page].owner = owner;
+    tpr[new_page].free = false;
     tpr[new_page].virtualPage = virtualPage;
     UnlockPage(new_page);
 
@@ -200,7 +201,7 @@ int PhysicalMemManager::EvictPage() {
             g_machine->mmu->translationTable->clearBitU(tpr[i_clock].virtualPage);
         }
         if (tpr[i_clock].locked == false){
-            //g_swap_manager->PutPageSwap(-1,g_machine->mainMemory[] );
+            //g_swap_manager->PutPageSwap(-1, );
             process_end = true;
         }
         else {

@@ -43,25 +43,27 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
 {
 #ifdef ETUDIANTS_TP
 
-  if(g_machine->mmu->translationTable->getBitSwap(virtualPage)) {
+ if(g_machine->mmu->translationTable->getBitSwap(virtualPage)) {
       DEBUG('v', (char *) "Defaut de page, page dans la zone swap, debut du changement de page\n");
       //TODO verifier qu"il n'est pas de voleur de page
       char buff_tmp[g_cfg->PageSize];
       g_swap_manager->GetPageSwap(g_machine->mmu->translationTable->getAddrDisk(virtualPage), buff_tmp);
       int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage);
-      g_machine->mmu->translationTable->setPhysicalPage(virtualPage, pp);
-      memcpy(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)]), &buff_tmp,
+      memcpy(&(g_machine->mainMemory[pp * g_cfg->PageSize]), &buff_tmp,
              sizeof(buff_tmp));
+      g_machine->mmu->translationTable->setPhysicalPage(virtualPage,pp);
       g_machine->mmu->translationTable->setBitValid(virtualPage);
   }
   else if(!g_machine->mmu->translationTable->getBitSwap(virtualPage) && g_machine->mmu->translationTable->getAddrDisk(virtualPage)==-1){
       DEBUG('v', (char *) "Page anonyme, allouage de la page et mise a 0\n");
       int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage);
-      DEBUG('v', (char *) "Page physique obtenur, link de la pgae virtuel et physique\n");
+      DEBUG('v', (char *) "On met la page a zero\n");
+      char tmp_buff_anon[g_cfg->PageSize];
+      memset(&tmp_buff_anon, 0, static_cast<size_t>(g_cfg->PageSize));
+      printf("Affichage buffer tmp : %X\n", tmp_buff_anon);
+      memcpy(&(g_machine->mainMemory[pp * g_cfg->PageSize]), &tmp_buff_anon,
+              g_cfg->PageSize);
       g_machine->mmu->translationTable->setPhysicalPage(virtualPage,pp);
-      DEBUG('v', (char *) "Link fait, on met la page a zero\n");
-      memset(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), 0,
-             static_cast<size_t>(g_cfg->PageSize));
       DEBUG('v', (char *)"Mise a zero termine, on previent la mmu que la page est swapable\n");
       g_machine->mmu->translationTable->setAddrDisk(virtualPage, -1);
       DEBUG('v', (char *)"La page est valide\n");
@@ -72,13 +74,14 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
       char tmp_buff[g_cfg->PageSize];
       DEBUG('v', (char *) "On lit le fichier de code que l'on place dans un buffer\n");
       g_current_thread->GetProcessOwner()->exec_file->ReadAt(tmp_buff, g_cfg->PageSize, g_machine->mmu->translationTable->getAddrDisk(virtualPage));
-      printf("Affichage buffer tmp : %X\n", tmp_buff);
+      DEBUG('v', (char *) "On recupere une page physique\n");
+      int pp = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage);
       DEBUG('v', (char *) "On copie sur la page reel le code recupere\n");
-      memcpy(&(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(virtualPage)*g_cfg->PageSize]), &tmp_buff,
-               static_cast<size_t>(g_cfg->PageSize));
+      memcpy(&g_machine->mainMemory[pp * g_cfg->PageSize], tmp_buff, g_cfg->PageSize);
+      DEBUG('v', (char *) "Copie termine, on link la page reel et virtuel \n");
+      g_machine->mmu->translationTable->setPhysicalPage(virtualPage,pp);
       g_machine->mmu->translationTable->setBitValid(virtualPage);
   }
-
 return ((ExceptionType)0);
 
 #endif

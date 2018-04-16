@@ -31,7 +31,7 @@ PhysicalMemManager::PhysicalMemManager() {
     tpr[i].owner=NULL;
     free_page_list.Append((void*)i);
   }
-  i_clock=-1;
+  i_clock=0;
 }
 
 PhysicalMemManager::~PhysicalMemManager() {
@@ -123,16 +123,19 @@ int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtual
 #ifdef ETUDIANTS_TP
 
     int new_page = FindFreePage();
+
     if(new_page == -1){
         new_page = EvictPage();
-        DEBUG('v', (char *) "Eviction de page, nouvelle page a le numero : %d", new_page);
+        DEBUG('v', (char *) "Eviction de page, nouvelle page a le numero : %d\n", new_page);
     }
+
     tpr[new_page].locked = true;
     tpr[new_page].owner = owner;
     tpr[new_page].free = false;
     tpr[new_page].virtualPage = virtualPage;
     UnlockPage(new_page);
 
+    return (new_page);
 
 #endif
 
@@ -185,7 +188,7 @@ int PhysicalMemManager::FindFreePage() {
 //-----------------------------------------------------------------
 int PhysicalMemManager::EvictPage() {
 
-    Semaphore * sema_voleur = new Semaphore( (char *) "Semaphore pour le voleur de page", 1);
+    //Semaphore * sema_voleur = new Semaphore( (char *) "Semaphore pour le voleur de page", 1);
 
 #ifdef ETUDIANTS_TP
     int old_value = i_clock;
@@ -196,12 +199,14 @@ int PhysicalMemManager::EvictPage() {
                 i_clock = 0;
             }
             i_clock++;
-        }
-        for (int i = old_value; i < i_clock; ++i) {
             g_machine->mmu->translationTable->clearBitU(tpr[i_clock].virtualPage);
         }
-        if (tpr[i_clock].locked == false){
-            //g_swap_manager->PutPageSwap(-1, );
+        if (!tpr[i_clock].locked){
+            DEBUG('v', (char *) "Debut de la mise dans le swap\n");
+            char tmp_buff[g_cfg->PageSize];
+            memcpy(tmp_buff, &(g_machine->mainMemory[g_machine->mmu->translationTable->getPhysicalPage(tpr->virtualPage)*g_cfg->PageSize]),
+                   static_cast<size_t>(g_cfg->PageSize));
+            g_swap_manager->PutPageSwap(-1, tmp_buff);
             process_end = true;
         }
         else {
